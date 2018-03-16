@@ -87,13 +87,12 @@ class FirehoseClient(object):
 
         Records is a list of tuple like (data, partition_key).
         """
-        data, partition_key = record
+        data = record
 
         log.debug('Sending record: %s', data[:100])
         try:
             call_and_retry(self.connection.put_record, self.max_retries,
-                           StreamName=self.stream, Data=data,
-                           PartitionKey=partition_key)
+                           DeliveryStreamName=self.stream, Record=data)
         except:
             log.exception('Failed to send records to Firehose')
 
