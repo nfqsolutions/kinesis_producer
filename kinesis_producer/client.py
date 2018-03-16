@@ -92,7 +92,8 @@ class FirehoseClient(object):
         log.debug('Sending record: %s', data[:100])
         try:
             call_and_retry(self.connection.put_record, self.max_retries,
-                           DeliveryStreamName=self.stream, Record=data)
+                           DeliveryStreamName=self.stream,
+                           Record={'Data': data})
         except:
             log.exception('Failed to send records to Firehose')
 
