@@ -87,7 +87,7 @@ class FirehoseClient(object):
 
         Records is a list of tuple like (data, partition_key).
         """
-        data = record
+        data, pk = record
 
         log.debug('Sending record: %s', data[:100])
         try:
