@@ -122,3 +122,23 @@ class ThreadPoolClient(Client):
     def join(self):
         super(ThreadPoolClient, self).join()
         self.pool.join()
+
+
+class FirehoseThreadPoolClient(FirehoseClient):
+    """Thread pool based asynchronous Firehose client."""
+
+    def __init__(self, config):
+        super(FirehoseThreadPoolClient, self).__init__(config)
+        self.pool = ThreadPool(processes=config['kinesis_concurrency'])
+
+    def put_record(self, records):
+        task_func = super(FirehoseThreadPoolClient, self).put_record
+        self.pool.apply_async(task_func, args=[records])
+
+    def close(self):
+        super(FirehoseThreadPoolClient, self).close()
+        self.pool.close()
+
+    def join(self):
+        super(FirehoseThreadPoolClient, self).join()
+        self.pool.join()

@@ -6,7 +6,7 @@ from six.moves import queue
 from .sender import Sender
 from .accumulator import RecordAccumulator
 from .buffer import RawBuffer
-from .client import Client, ThreadPoolClient, FirehoseClient
+from .client import Client, ThreadPoolClient, FirehoseClient, FirehoseThreadPoolClient
 from .partitioner import random_partitioner
 from .constants import KINESIS_RECORD_MAX_SIZE
 
@@ -75,8 +75,10 @@ class FirehoseProducer(object):
         self._closed = False
 
         accumulator = RecordAccumulator(RawBuffer, config)
-        client = FirehoseClient(config)
-
+        if config['kinesis_concurrency'] == 1:
+            client = FirehoseClient(config)
+        else:
+            client = FirehoseThreadPoolClient(config)
         self._sender = Sender(queue=self._queue,
                               accumulator=accumulator,
                               client=client,
