@@ -1,3 +1,3 @@
-from .producer import KinesisProducer
+from .producer import KinesisProducer, FirehoseProducer
 
-__all__ = ['KinesisProducer']
+__all__ = ['KinesisProducer', 'FirehoseProducer']
