@@ -4,6 +4,7 @@ from multiprocessing.pool import ThreadPool
 
 import boto3
 import botocore
+from botocore.exceptions import *
 
 log = logging.getLogger(__name__)
 
@@ -94,8 +95,12 @@ class FirehoseClient(object):
             call_and_retry(self.connection.put_record, self.max_retries,
                            DeliveryStreamName=self.stream,
                            Record={'Data': data})
-        except:
-            log.exception('Failed to send records to Firehose')
+        except Exception as e:
+            log.info(type(e))
+            log.exception('Failed to send records to Firehose. Retrying')
+            call_and_retry(self.connection.put_record, self.max_retries,
+                           DeliveryStreamName=self.stream,
+                           Record={'Data': data})
 
     def close(self):
         log.debug('Closing client')
