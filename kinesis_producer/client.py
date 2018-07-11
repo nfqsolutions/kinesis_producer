@@ -34,15 +34,13 @@ def call_and_retry(boto_function, max_retries, **kwargs):
 
         try:
             return boto_function(**kwargs)
-        except botocore.exceptions.ClientError as exc:
+        except Exception as exc:
             if retries >= max_retries:
                 raise exc
             error_code = exc.response.get("Error", {}).get("Code")
-            if error_code == 'ProvisionedThroughputExceededException':
-                time.sleep(2 ** retries * .1)
-                retries += 1
-            else:
-                raise exc
+            log.warning('Error code: {}'.format(error_code))
+            time.sleep(2 ** retries * .1)
+            retries += 1
 
 
 class Client(object):
@@ -96,7 +94,7 @@ class FirehoseClient(object):
                            DeliveryStreamName=self.stream,
                            Record={'Data': data})
         except Exception as e:
-            log.info(type(e))
+            log.info('Exception type: {}'.format(type(e)))
             log.exception('Failed to send records to Firehose. Retrying')
             call_and_retry(self.connection.put_record, self.max_retries,
                            DeliveryStreamName=self.stream,
